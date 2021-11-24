@@ -18,15 +18,16 @@ class Sudoku:
 
     def place(self, value: int, x: int, y: int) -> None:
         """Place value at x,y."""
+        # Select the row we want to change 
         row = self._grid[y]
         new_row = ""
 
-        for i in range(9):
-            if i == x:
-                new_row += str(value)
-            else:
-                new_row += row[i]
+        # Create the new row 
+        new_row += row[:x]
+        new_row += str(value)
+        new_row += row[x+1:]
 
+        # Overwrite the old row 
         self._grid[y] = new_row
 
     def unplace(self, x: int, y: int) -> None:
@@ -38,12 +39,8 @@ class Sudoku:
     def value_at(self, x: int, y: int) -> int:
         """Returns the value at x,y."""
         value = -1
-
-        for i in range(9):
-            for j in range(9):
-                if i == x and j == y:
-                    row = self._grid[y]
-                    value = int(row[x])
+        row = self._grid[y]
+        value = int(row[x])
 
         return value
 
@@ -82,17 +79,21 @@ class Sudoku:
             for x in range(9):
                 if self.value_at(x, y) == 0 and next_x == -1 and next_y == -1:
                     next_x, next_y = x, y
+                    return next_x, next_y
 
         return next_x, next_y
 
     def row_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th row."""
-        values = []
+        row = []
 
-        for j in range(9):
-            values.append(self.value_at(j, i))
+        # Select the i'th row, turn it into a list and convert to ints
+        row_string = self._grid[i]
+        row_list = list(row_string)
+        for char in row_list:
+            row.append(int(char))
 
-        return values
+        return row
 
     def column_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th column."""
@@ -135,14 +136,17 @@ class Sudoku:
             for value in values:
                 if value not in self.column_values(i):
                     result = False
+                    return result
 
                 if value not in self.row_values(i):
                     result = False
+                    return result
 
                 if value not in self.block_values(i):
                     result = False
+                    return result
+        return result 
 
-        return result
 
     def __str__(self) -> str:
         representation = ""
